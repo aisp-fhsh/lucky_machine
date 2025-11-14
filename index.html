@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>豪華拉霸機</title>
+    <!-- 載入 Tailwind CSS --><script src="https://cdn.tailwindcss.com"></script>
+    <!-- 載入 Inter 字體 --><link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+TC:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        /* 使用 Noto Sans TC 作為主要中文字體，Inter 作為數字和英文字體 */
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+        }
+        /* 數字使用更具風格的 Mono 字體 */
+        .slot-number {
+            font-family: 'Inter', monospace;
+            /* 讓數字有輕微的內陰影，看起來更有深度 */
+            text-shadow: 0 2px 3px rgba(0, 0, 0, 0.4);
+        }
+        /* 頂部燈光光暈效果 - 初始靜止，中獎時加入動畫 */
+        .top-light {
+            box-shadow: 0 0 15px 5px rgba(250, 204, 21, 0.5); /* 初始較弱光暈 */
+        }
+        /* 頂部燈光閃爍動畫 */
+        .top-light.active {
+            animation: pulse-light 2s infinite ease-in-out;
+            box-shadow: 0 0 25px 10px rgba(250, 204, 21, 0.7); /* 激活時更強光暈 */
+        }
+        @keyframes pulse-light {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 25px 10px rgba(250, 204, 21, 0.7);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 35px 15px rgba(250, 204, 21, 0.8);
+            }
+        }
+        /* 標題光暈效果 */
+        .title-glow {
+            text-shadow: 0 0 8px #fde047, 0 0 16px #fde047;
+        }
+        /* 捲軸滾動的模糊效果 */
+        .spinning {
+            animation: text-blur 0.05s infinite linear;
+        }
+        @keyframes text-blur {
+            0% { filter: blur(2px) opacity(0.8); }
+            50% { filter: blur(0px) opacity(1); }
+            100% { filter: blur(2px) opacity(0.8); }
+        }
+        /* 中獎動畫 */
+        .win-glow {
+            animation: win-pulse 1.5s infinite;
+        }
+        @keyframes win-pulse {
+            0%, 100% { 
+                color: #4ade80; /* green-400 */
+                text-shadow: 0 0 10px #4ade80, 0 0 20px #4ade80;
+            }
+            50% { 
+                color: #fde047; /* yellow-300 */
+                text-shadow: 0 0 10px #fde047, 0 0 20px #fde047;
+            }
+        }
+
+        /* 拉桿把手的按下狀態 */
+        .lever-handle-pressed {
+            transform: translateY(8px); /* 向下按壓 */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5) inset, 0 0 5px rgba(255,255,255,0.2); /* 內陰影模擬按壓 */
+        }
+
+        /* 經典拉桿臂樣式 */
+        #lever {
+            background: linear-gradient(to right, #718096, #e2e8f0, #718096); /* 銀色金屬漸層 */
+            border: 2px solid #4a5568; /* 灰色邊框 */
+            box-shadow: 
+                -3px 0 6px rgba(0,0,0,0.5), /* 左側陰影 */
+                inset 2px 0 4px rgba(255,255,255,0.7); /* 內部高光 */
+        }
+
+        /* 經典拉桿把手樣式 */
+        #leverHandle {
+            background: radial-gradient(circle at 60% 40%, #ef4444, #b91c1c); /* 經典紅色球體漸層 */
+            box-shadow: 
+                0 4px 8px rgba(0,0,0,0.4), /* 底部陰影 */
+                inset 0 0 10px rgba(255,255,255,0.5); /* 內部高光 */
+            border-color: #7f1d1d; /* 深紅邊框 */
+        }
+        #leverHandle:hover {
+            background: radial-gradient(circle at 60% 40%, #f87171, #dc2626); /* 懸停時變亮 */
+        }
+    </style>
+</head>
+<!-- 增加漸層背景 --><body class="bg-gradient-to-br from-gray-900 via-gray-800 to-red-900/30 text-white flex items-center justify-center min-h-screen p-4">
+
+    <!-- 拉霸機整體容器，用於定位底座 --><div class="relative flex flex-col items-center">
+        <!-- 拉霸機主體 - 增加漸層和陰影 --><div class="bg-gradient-to-b from-red-800 to-red-900 border-8 border-red-900/80 rounded-3xl shadow-xl shadow-red-900/30 p-6 w-full max-w-md relative shadow-inner">
+            
+            <!-- 頂部燈光 - 調整位置和邊框 --><div id="topLight" class="absolute -top-7 left-[calc(50%+20px)] -translate-x-1/2 w-14 h-14 bg-yellow-400 rounded-full border-4 border-yellow-200/80 top-light"></div>
+
+            <!-- 標題 - 改為漸層文字 --><h1 class="bg-clip-text text-transparent bg-gradient-to-b from-yellow-300 to-yellow-500 text-4xl font-black text-center mb-6 title-glow">
+                豪華拉霸機
+            </h1>
+
+            <!-- 捲軸區域 - 增加內陰影和調整背景 --><div class="bg-black/70 rounded-lg p-4 flex justify-around gap-3 sm:gap-4 border-4 border-gray-700 shadow-inner shadow-black/40">
+                <!-- 捲軸 1 - 增加內陰影和漸層 --><div class="bg-gradient-to-b from-gray-800 to-gray-900 w-20 h-28 sm:w-24 sm:h-32 rounded-md flex items-center justify-center text-white text-6xl sm:text-7xl font-black overflow-hidden shadow-inner shadow-black/30">
+                    <span id="slot1" class="slot-number">0</span>
+                </div>
+                <!-- 捲軸 2 - 增加內陰影和漸層 --><div class="bg-gradient-to-b from-gray-800 to-gray-900 w-20 h-28 sm:w-24 sm:h-32 rounded-md flex items-center justify-center text-white text-6xl sm:text-7xl font-black overflow-hidden shadow-inner shadow-black/30">
+                    <span id="slot2" class="slot-number">0</span>
+                </div>
+                <!-- 捲軸 3 - 增加內陰影和漸層 --><div class="bg-gradient-to-b from-gray-800 to-gray-900 w-20 h-28 sm:w-24 sm:h-32 rounded-md flex items-center justify-center text-white text-6xl sm:text-7xl font-black overflow-hidden shadow-inner shadow-black/30">
+                    <span id="slot3" class="slot-number">0</span>
+                </div>
+            </div>
+
+            <!-- 結果訊息 --><div class="h-10 mt-4 text-center">
+                <span id="result-message" class="text-2xl font-bold text-gray-400 transition-all duration-300">
+                    拉動拉桿開始
+                </span>
+            </div>
+            
+            <!-- 重新設計的拉桿 (移除金色鉚釘) --><div id="lever" class="absolute right-0 translate-x-[80%] top-1/4 w-8 h-36 rounded-l-lg transition-transform duration-150 ease-in-out sm:block">
+                
+                <!-- 重新設計的拉桿把手 --><div id="leverHandle" class="w-12 h-12 rounded-full absolute -top-8 -right-2 border-4 cursor-pointer transition-all duration-100"></div>
+            </div>
+        </div>
+
+        <!-- 豪華底座 --><div class="w-full max-w-md h-12 bg-gradient-to-b from-yellow-700 to-yellow-900 border-x-8 border-b-8 border-yellow-900 rounded-b-3xl shadow-xl shadow-yellow-900/50 -mt-2 relative z-[-1]">
+            <div class="absolute inset-0 bg-yellow-900/30 rounded-b-3xl"></div>
+            <div class="absolute left-1/2 -translate-x-1/2 bottom-2 w-4/5 h-4 bg-yellow-800 rounded-md shadow-inner shadow-black/30"></div>
+        </div>
+    </div>
+
+
+    <script>
+        // 獲取 DOM 元素
+        const slot1 = document.getElementById('slot1');
+        const slot2 = document.getElementById('slot2');
+        const slot3 = document.getElementById('slot3');
+        const lever = document.getElementById('lever'); // 拉桿臂
+        const leverHandle = document.getElementById('leverHandle'); // 拉桿把手
+        const resultMessage = document.getElementById('result-message');
+        const topLight = document.getElementById('topLight'); // 頂部燈光元素
+        const slots = [slot1, slot2, slot3];
+
+        let isSpinning = false;
+
+        // 監聽拉桿點擊
+        leverHandle.addEventListener('click', spin);
+
+        // 拉霸函數
+        async function spin() {
+            if (isSpinning) return;
+            isSpinning = true;
+
+            // 禁用拉桿並顯示動畫
+            leverHandle.classList.add('opacity-50', 'cursor-not-allowed', 'lever-handle-pressed'); // 新增按壓效果
+            lever.classList.add('translate-y-8'); // 拉下動畫
+
+            // 在開始轉動時，關閉燈光閃爍
+            topLight.classList.remove('active');
+
+            resultMessage.textContent = '轉動中...';
+            resultMessage.className = 'text-2xl font-bold text-gray-400 transition-all duration-300'; // 重置樣式
+
+            // 模擬拉桿彈回
+            await new Promise(resolve => setTimeout(resolve, 150));
+            lever.classList.remove('translate-y-8');
+            leverHandle.classList.remove('lever-handle-pressed'); // 移除按壓效果
+
+            // 模擬捲軸動畫
+            const spinDuration = 3000; // 總共轉動時間
+            const stopDelay = 500;    // 每個捲軸停止的間隔
+            
+            const intervals = slots.map(slot => {
+                slot.classList.add('spinning'); // 加入模糊效果
+                return setInterval(() => {
+                    slot.textContent = Math.floor(Math.random() * 10);
+                }, 50); // 每 50ms 變換一次數字
+            });
+
+            // 產生最終結果
+            const finalReels = [
+                Math.floor(Math.random() * 10),
+                Math.floor(Math.random() * 10),
+                Math.floor(Math.random() * 10)
+            ];
+
+            // 逐個停止捲軸
+            for (let i = 0; i < slots.length; i++) {
+                await new Promise(resolve => setTimeout(resolve, i === 0 ? spinDuration - stopDelay * 2 : stopDelay));
+                clearInterval(intervals[i]);
+                slots[i].classList.remove('spinning');
+                slots[i].textContent = finalReels[i];
+            }
+
+            // 檢查是否中獎
+            checkWin(finalReels);
+
+            // 重新啟用拉桿
+            isSpinning = false;
+            leverHandle.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+        // 檢查中獎函數
+        function checkWin(reels) {
+            const [n1, n2, n3] = reels;
+
+            // 條件1: 三個相同
+            const isTriple = (n1 === n2 && n2 === n3);
+
+            // 條件2: 連續遞增 (包含 8-9-0)
+            const isSeqAsc = (n2 === (n1 + 1) % 10) && (n3 === (n2 + 1) % 10);
+
+            // 條件3: 連續遞減 (包含 1-0-9)
+            const isSeqDesc = (n2 === (n1 - 1 + 10) % 10) && (n3 === (n2 - 1 + 10) % 10);
+
+            if (isTriple || isSeqAsc || isSeqDesc) {
+                // 中獎
+                let winType = isTriple ? `三個 ${n1}！` : `連號！`;
+                resultMessage.textContent = `恭喜中獎！${winType}`;
+                resultMessage.className = 'text-2xl font-bold win-glow'; // 加入中獎樣式
+                topLight.classList.add('active'); // 中獎時激活燈光閃爍
+            } else {
+                // 未中獎
+                resultMessage.textContent = '可惜，再試一次！';
+                resultMessage.className = 'text-2xl font-bold text-gray-400 transition-all duration-300';
+                topLight.classList.remove('active'); // 未中獎時確保燈光不閃爍
+            }
+        }
+    </script>
+
+</body>
+</html>
